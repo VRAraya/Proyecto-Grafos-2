@@ -71,4 +71,4 @@ class Nodo:
 
     def __repr__(self):                                 #Metodo que muestra por consola el nodo con todos sus parametros
         
-        return ("<Nodo id='%s', nombre='%s', esFinal='%s', transiciones='%s'>\n" % (hex(id(self)), self.nombre, self.final, self.transiciones))
+        return ("<nombre='%s', esFinal='%s', transiciones='%s'>\n" % (self.nombre, self.final, self.transiciones))

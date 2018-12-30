@@ -3,7 +3,6 @@
 
 import collections      #Se importa la superclase Colecciones para utilizar los diccionarios ordenados
 from Nodo import Nodo   #Se importa la clase Nodo desde el archivo Nodo.py
-import sys              #Se importa sys
 import copy             #Se importa copy
 
 class AF:
@@ -58,7 +57,7 @@ class AF:
             if len(transiciones) < len(self.simbolos):          #Si tiene transiciones para menos simbolos que los validos es un AFND
                 return False
             
-            for simbolo, destinos in transiciones.items():      #Revisamos cada transicion
+            for simbolo, destinos in iter(transiciones.items()):      #Revisamos cada transicion
                 
                 if len(str(simbolo)) > 1:                       #Si el simbolo tiene mas de un caracter es un AFND
                     return False
@@ -73,7 +72,7 @@ class AF:
         nuevosNodos = nodos[:]                                              #Creamos una copia de los nodos para verificar cambios al final
         
         for nodoNombre in nodos:                                            #Iteramos sobre los nodos
-            nuevosNodos += self.nodos[nodoNombre].ObtenerTransiciones("E")  #Obtenemos todas las transiciones que se pueden hacer con la palabra vacia
+            nuevosNodos += self.nodos[nodoNombre].ObtenerTransicion("E")  #Obtenemos todas las transiciones que se pueden hacer con la palabra vacia
         
         nuevosNodos = list(set(nuevosNodos))                                #Eliminamos los nodos repetidos
         
@@ -111,8 +110,8 @@ class AF:
         
         tempNodoID = 1                                  #Iniciamos un contador para los nodos que usaremos para eliminar las secuencias con longitud mayor que 1
         
-        for nodoNombre, nodo in self.nodos.items():                             #Iteramos sobre los nodos
-            for simbolo, transicion in nodo.ObtenerTransiciones.items():        #Obtenemos las transiciones de cada nodo                                                                  
+        for nodoNombre, nodo in iter(self.nodos.items()):                             #Iteramos sobre los nodos
+            for simbolo, transicion in iter(nodo.ObtenerTransiciones().items()):        #Obtenemos las transiciones de cada nodo                                                                  
                 if len(simbolo) > 1:                                            #Revisamos si la secuencia tiene longitud mayor que 1
                     rsimbolo = simbolo[::-1]            #Invertimos la secuencia
                     ultimoNodo = transicion             #Cada nodo que vayamos creando apuntara al ultimo creado, en el primer caso es a la transicion completa del simbolo
@@ -211,12 +210,11 @@ class AF:
                     grupos[grupoID] = []
 
                 grupos[grupoID].append(nodo)                    #Asociamos el nodo a un grupo en especifico y viceversa
-                gruposporNombre[nodo.getName()] = grupoID
+                gruposporNombre[nodo.ObtenerNombre()] = grupoID
 
             self.MinimizarR(grupos, gruposporNombre)             #Ejecutamos el metodo recursivo que minimiza el AFD
         else:
-            print ("No se puede minimizar un AFND, para esto debe ejecutar ",sys.argv[0]," afd ",sys.argv[2]," ",sys.argv[3]," minimo")
-            sys.exit()
+            print ("No se puede minimizar un AFND")
 
 
     def MinimizarR(self, grupos, grupoporNombre):       #Metodo que minimiza recursivamente un AFD
@@ -255,7 +253,7 @@ class AF:
                     siguienteGrupoID += 1
 
                 nuevosGrupos[grupoID].append(nodo)                              #Asociamos el nodo al nuevo grupo y viceversa
-                nuevoGrupoporNombre[nodo.getName()] = grupoID
+                nuevoGrupoporNombre[nodo.ObtenerNombre()] = grupoID
 
         if grupos == nuevosGrupos:                                              #Si el grupo recibido como parametro es igual al obtenido en la iteracion solo nos queda eliminar los duplicados
             self.EliminarDuplicados(nuevosGrupos)
@@ -313,4 +311,25 @@ class AF:
         return False
 
     def __repr__(self):             #Metodo que muestra por consola el AF con todos sus parametros
-        return ("<AF alfabeto: '%s', nodos: '\n%s'>" % (self.simbolos, self.nodos))
+        print("<AF alfabeto: '%s', nodos: '\n%s'>" % (self.simbolos, self.nodos))
+        return("<AF alfabeto: '%s', nodos: '\n%s'>" % (self.simbolos, self.nodos))
+
+    def quintupla(self):        #Metodo que muestra por consola la quintupla del AF
+        estados=[]
+        estadosf=[]
+        transicionesS=""
+        for nombreNodo, nodo in iter(self.nodos.items()):
+            estados.append(nombreNodo)
+            if nodo.EsFinal():
+                estadosf.append(nombreNodo)
+            transiciones = nodo.ObtenerTransiciones()
+            for simbolo, destinos in iter(transiciones.items()):
+                for destino in destinos:
+                    transicionesS+="("+nombreNodo+", "+simbolo+", "+destino+")"
+
+        
+        print("Estados: %s" %(estados))
+        print("Alfabeto: %s" %(self.simbolos))
+        print("Estado inicial: %s" %(self.inicial))
+        print("Estados finales: %s" %(estadosf))
+        print("Transiciones: "+ transicionesS)

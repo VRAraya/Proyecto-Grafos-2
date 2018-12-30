@@ -1,0 +1,5 @@
+q0 N E:q1
+q1 N E:q2
+q2 N a:q3
+q3 S b:q4
+q4 S a:q4 b:q4
